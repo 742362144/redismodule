@@ -1,0 +1,20 @@
+[package]
+name = "add"
+version = "0.1.0"
+authors = ["742362144 <742362144@qq.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+crate-type = ["dylib"]
+
+[dependencies]
+log = "0.4"
+redismodule = {path = "../../../redismodule"}
+
+#[dependencies.redis-module]
+#version = "0.11.0"
+#default-features = false # do not include the default features, and optionally
+## cherry-pick individual features
+#features = ["experimental-api"]

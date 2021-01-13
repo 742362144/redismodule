@@ -3,11 +3,17 @@ use std::sync::mpsc::{Sender, Receiver};
 
 use tonic::{transport::Server, Request, Response, Status};
 
+use redis_module::{Context, RedisError, RedisResult, ThreadSafeContext, DetachedFromClient};
+
 use hello_world::greeter_server::{Greeter, GreeterServer};
 use hello_world::{HelloReply, HelloRequest};
 use std::thread;
 
-use super::executor::{Executor, Invoke};
+use std::time::Duration;
+
+use super::executor::Executor;
+use std::rc::Rc;
+use crate::Invoke;
 
 pub mod hello_world {
     tonic::include_proto!("helloworld");
@@ -16,6 +22,7 @@ pub mod hello_world {
 // #[derive(Default)]
 pub struct MyGreeter {
     tx: Mutex<Sender<Invoke>>,
+
 }
 
 impl MyGreeter {
@@ -32,7 +39,6 @@ impl Greeter for MyGreeter {
         &self,
         request: Request<HelloRequest>,
     ) -> Result<Response<HelloReply>, Status> {
-
         let (tx, rx): (Sender<String>, Receiver<String>) = mpsc::channel();
 
         self.tx.lock().unwrap().send(Invoke{tx, req: String::from("hello")});
@@ -49,11 +55,20 @@ impl Greeter for MyGreeter {
 }
 
 #[tokio::main]
-pub async fn start_server() -> Result<(), Box<dyn std::error::Error>> {
+pub async fn start_server(tctx: ThreadSafeContext<DetachedFromClient>) -> Result<(), Box<dyn std::error::Error>> {
+    // thread::spawn(move || {
+    //     for _ in 0..2 {
+    //         let ctx = tctx.lock();
+    //         ctx.call("INCR", &["threads"]).unwrap();
+    //         thread::sleep(Duration::from_millis(100));
+    //     }
+    // });
+
+
     let addr = "[::1]:50051".parse().unwrap();
 
     let (tx, rx): (Sender<Invoke>, Receiver<Invoke>) = mpsc::channel();
-    let executor = Executor::new(Mutex::new(rx));
+    let executor = Executor::new(Mutex::new(rx), ThreadSafeContext::new());
     // let arc = Arc::new(executor);
     let greeter = MyGreeter::new(tx);
     // let (tx, rx) : (Sender<Invoke>, Receiver<Invoke>) = mpsc::channel();

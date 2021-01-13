@@ -7,18 +7,23 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 #[[bin]]
-#name = "helloworld-server"
-#path = "src/server.rs"
+#name = "server"
+#path = "src/bin/server.rs"
+#required-features= ["generator_trait", "generators"]
 
-[[bin]]
-name = "helloworld-client"
-path = "src/bin/client.rs"
+
+#[[bin]]
+#name = "client"
+#path = "src/bin/client.rs"
+#
+#[[example]]
+#name = "module"
+#crate-type = ["cdylib"]
+#required-features = ["experimental-api"]
 
 [lib]
-name = "module"
+name = "redismodule"
 crate-type = ["cdylib"]
-required-features = ["experimental-api"]
-
 
 [dependencies]
 tonic = { version = "0.1.0", features = ["tls"] }
@@ -61,10 +66,16 @@ spin = "0.4.7"
 x86 = "0.34.0"
 time = "0.2.23"
 rand = "0.8.1"
-redis-module = "0.11.0"
+#redis-module = {version = "0.11.0", feature = ["experimental-api"]}
 log = "0.4.8"
 
+[dependencies.redis-module]
+version = "0.11.0"
+default-features = false # do not include the default features, and optionally
+# cherry-pick individual features
+features = ["experimental-api"]
 
 
 [build-dependencies]
 tonic-build = { version = "0.3.1", features = ["prost"] }
+
