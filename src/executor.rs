@@ -17,7 +17,7 @@ use redis_module::{ThreadSafeContext, DetachedFromClient};
 use libloading::os::unix::{Library, Symbol};
 use std::pin::Pin;
 use std::ops::{Generator, GeneratorState};
-use crate::{Invoke, DataReq, init};
+use crate::{Invoke, init, Task, TaskState};
 
 
 //
@@ -91,12 +91,11 @@ use crate::{Invoke, DataReq, init};
 
 
 pub struct Policy {
-    pub tctx: ThreadSafeContext<DetachedFromClient>,
+    pub tctx: Mutex<ThreadSafeContext<DetachedFromClient>>,
 }
 
-
 impl Policy {
-    pub fn new(tctx: ThreadSafeContext<DetachedFromClient>) -> Policy {
+    pub fn new(tctx: Mutex<ThreadSafeContext<DetachedFromClient>>) -> Policy {
         Policy {
             tctx: tctx,
         }
@@ -114,66 +113,66 @@ impl Policy {
     // }
 
     pub fn get(&self, key: &str) {
-        let ctx = self.tctx.lock();
+        let ctx = self.tctx.lock().unwrap().lock();
         ctx.call("GET", &[key]).unwrap();
     }
 
     pub fn set(&self, key: &str, data: &str) {
-        let ctx = self.tctx.lock();
+        let ctx = self.tctx.lock().unwrap().lock();
         ctx.call("SET", &[key, data]).unwrap();
     }
 }
 
 pub struct Executor {
     pub policy: Arc<Mutex<Policy>>,
-    pub rx: Mutex<Receiver<Invoke>>,
+    pub waiting: RwLock<VecDeque<Box<Invoke>>>,
+    pub running: RwLock<VecDeque<Box<Task>>>,
 }
 
 impl Executor {
-
-    pub fn new(rec: Mutex<Receiver<Invoke>>, tctx: ThreadSafeContext<DetachedFromClient>) -> Executor {
+    pub fn new(tctx: Mutex<ThreadSafeContext<DetachedFromClient>>) -> Executor {
         // let (tx, rx): (Sender<DataReq>, Receiver<DataReq>) = mpsc::channel();
         Executor {
             policy: Arc::new(Mutex::new(Policy::new(tctx))),
-            rx: rec,
+            waiting: RwLock::new(VecDeque::new()),
+            running: RwLock::new(VecDeque::new()),
         }
+    }
+
+    pub fn add_task(&self, inv: Invoke) {
+        self.waiting.write().unwrap().push_back(Box::new(inv));
     }
 
     pub fn run(&self) {
         loop {
-            let received = self.rx.lock().unwrap().recv().unwrap();
-            println!("{}", received.req);
-
-            let b = self.policy.clone();
-            unsafe {
-                println!("{}", "2");
-                println!("{}", "3");
-                let mut generator = init(b);
-                println!("{}", "4");
-
-                // println!("1");
-                // Pin::new(&mut generator).resume(());
-                // println!("3");
-                // let Some(GeneratorState<res1, res2>) = Pin::new(&mut generator).resume(());
-                // println!("5");
-
-                // db.set(String::from("c"), Bytes::from("dadada"), None);
-                match generator.as_mut().resume(()) {
-                    GeneratorState::Yielded(1) => println!("Yielded"),
-                    _ => panic!("unexpected return from resume"),
+            if self.waiting.read().unwrap().len() > 0 || self.running.write().unwrap().len() < 64 {
+                let inv = self.waiting.write().unwrap().pop_front();
+                if let Some(mut inv) = inv {
+                    let pl = self.policy.clone();
+                    let gen = init(pl);
+                    self.running.write().unwrap().push_back(Box::new(Task::new(inv, Some(gen))));
                 }
-                match generator.as_mut().resume(()) {
-                    GeneratorState::Complete(1111) => println!("Completed"),
-                    _ => panic!("unexpected return from resume"),
+
+            }
+            let task = self.waiting.write().unwrap().pop_front();
+
+            let task = self.running.write().unwrap().pop_front();
+
+            if let Some(mut task) = task {
+                if task.run().0 == TaskState::COMPLETED {
+                    println!("{}", "task finish.");
+                    task.inv.tx.lock().unwrap().send(String::from("finish!"));
+                } else {
+                    println!("{}", "check server overhead.");
+                    self.running.write().unwrap().push_back(task);
                 }
             }
-
-
-            received.tx.send(String::from("hello"));
         }
     }
 }
 
+unsafe impl Send for Executor {}
+unsafe impl Sync for Executor {}
 
 // fn print_world(exec: Arc<&Executor>) {
 //     exec.set("C", "3");

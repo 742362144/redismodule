@@ -13,7 +13,7 @@ use std::time::Duration;
 
 use super::executor::Executor;
 use std::rc::Rc;
-use crate::Invoke;
+use crate::{Invoke, init};
 
 pub mod hello_world {
     tonic::include_proto!("helloworld");
@@ -21,14 +21,13 @@ pub mod hello_world {
 
 // #[derive(Default)]
 pub struct MyGreeter {
-    tx: Mutex<Sender<Invoke>>,
-
+    exec: Arc<Executor>,
 }
 
 impl MyGreeter {
-    pub fn new(tx: Sender<Invoke>) -> MyGreeter {
+    pub fn new(exec: Arc<Executor>) -> MyGreeter {
         MyGreeter{
-            tx: Mutex::new(tx),
+            exec,
         }
     }
 }
@@ -41,7 +40,10 @@ impl Greeter for MyGreeter {
     ) -> Result<Response<HelloReply>, Status> {
         let (tx, rx): (Sender<String>, Receiver<String>) = mpsc::channel();
 
-        self.tx.lock().unwrap().send(Invoke{tx, req: String::from("hello")});
+        let inv = Invoke{tx: Mutex::new(tx), req: String::from("hello")};
+        self.exec.add_task(inv);
+
+        // self.tx.lock().unwrap().send(Invoke{tx, req: String::from("hello")});
 
         let res = rx.recv().unwrap();
         println!("{}", res);
@@ -67,15 +69,16 @@ pub async fn start_server(tctx: ThreadSafeContext<DetachedFromClient>) -> Result
 
     let addr = "[::1]:50051".parse().unwrap();
 
-    let (tx, rx): (Sender<Invoke>, Receiver<Invoke>) = mpsc::channel();
-    let executor = Executor::new(Mutex::new(rx), ThreadSafeContext::new());
+    // let (tx, rx): (Sender<Invoke>, Receiver<Invoke>) = mpsc::channel();
+    let executor = Arc::new(Executor::new(Mutex::new(tctx)));
     // let arc = Arc::new(executor);
-    let greeter = MyGreeter::new(tx);
+    let exec = executor.clone();
+
+    let greeter = MyGreeter::new(executor);
     // let (tx, rx) : (Sender<Invoke>, Receiver<Invoke>) = mpsc::channel();
 
-
     thread::spawn(move || {
-        executor.run();
+        exec.run();
         // loop {
         //     round.run();
         //     // time::Duration::from_millis(1000);
