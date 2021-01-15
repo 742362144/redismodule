@@ -4,7 +4,9 @@ fn main() {
     //     .compile(&["proto/routeguide/route_guide.proto"], &["proto"])
     //     .unwrap();
 
-    tonic_build::compile_protos("proto/helloworld/helloworld.proto").unwrap();
-    // tonic_build::compile_protos("proto/echo/echo.proto").unwrap();
+    // tonic_build::compile_protos("proto/helloworld/helloworld.proto").unwrap();
+
+    // see https://www.swiftdiaries.com/rust/tonic/
+    tonic_build::compile_protos("proto/funcloc/funcloc.proto").unwrap();
     // tonic_build::compile_protos("proto/google/pubsub/pubsub.proto").unwrap();
 }

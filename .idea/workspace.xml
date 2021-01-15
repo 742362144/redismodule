@@ -2,11 +2,23 @@
 <project version="4">
   <component name="CargoProjects">
     <cargoProject FILE="$PROJECT_DIR$/Cargo.toml" />
+    <cargoProject FILE="$PROJECT_DIR$/util/proto/Cargo.toml" />
+    <cargoProject FILE="$PROJECT_DIR$/util/resp/Cargo.toml" />
   </component>
   <component name="ChangeListManager">
     <list default="true" id="eb4c8bf1-2afe-4d25-a324-691793a84aa0" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/cycles.rs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/proto/funcloc/funcloc.proto" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/bin/bench.rs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ext.rs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/model.rs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/policy.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/redismodule.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/redismodule.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Cargo.lock" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.rs" beforeDir="false" afterPath="$PROJECT_DIR$/build.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/bin/test.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/bin/test.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/executor.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/executor.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/server.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/server.rs" afterDir="false" />
@@ -30,6 +42,7 @@
     <option name="directoryName" value="pwbgy9u9" />
   </component>
   <component name="ProjectId" id="1mx1AFvFB3kdYzbIbFb3FQZ8daS" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -48,32 +61,48 @@
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="org.rust.cargo.project.model.PROJECT_DISCOVERY" value="true" />
+    <property name="org.rust.disableDetachedFileInspection/home/coder/IdeaProjects/redismodule/src/model.rs" value="true" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src" />
+      <recent name="$PROJECT_DIR$/util/resp/src" />
+      <recent name="$PROJECT_DIR$/util/proto/src" />
       <recent name="$PROJECT_DIR$/src/bin" />
+      <recent name="$PROJECT_DIR$/proto" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src/bin" />
     </key>
   </component>
-  <component name="RunManager" selected="Cargo.Run test">
-    <configuration default="true" type="ArquillianTestNG" factoryName="" nameIsGenerated="true">
+  <component name="RunManager" selected="Cargo.Test policy">
+    <configuration default="true" type="ArquillianJUnit" factoryName="" nameIsGenerated="true">
       <option name="arquillianRunConfiguration">
         <value>
           <option name="containerStateName" value="" />
         </value>
       </option>
-      <option name="TEST_OBJECT" value="CLASS" />
-      <properties />
-      <listeners />
+      <option name="TEST_OBJECT" value="class" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Run test" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
-      <option name="command" value="run --package redismodule --bin test" />
+    <configuration name="Test cycles" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="command" value="test --package resp --lib cycles" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$/util/resp" />
+      <option name="channel" value="DEFAULT" />
+      <option name="allFeatures" value="false" />
+      <option name="emulateTerminal" value="false" />
+      <option name="backtrace" value="SHORT" />
+      <envs />
+      <option name="isRedirectInput" value="false" />
+      <option name="redirectInputPath" value="" />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Test model" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="command" value="test --package redismodule --lib model" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$" />
       <option name="channel" value="DEFAULT" />
       <option name="allFeatures" value="false" />
@@ -86,8 +115,36 @@
         <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
     </configuration>
-    <configuration name="build" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
-      <option name="command" value="build --package redismodule --lib" />
+    <configuration name="Test model::test" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="command" value="test --package redismodule --lib model::test" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <option name="channel" value="DEFAULT" />
+      <option name="allFeatures" value="false" />
+      <option name="emulateTerminal" value="false" />
+      <option name="backtrace" value="SHORT" />
+      <envs />
+      <option name="isRedirectInput" value="false" />
+      <option name="redirectInputPath" value="" />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Test model::test::proto" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="command" value="test --package redismodule --lib model::test::proto -- --exact" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <option name="channel" value="DEFAULT" />
+      <option name="allFeatures" value="false" />
+      <option name="emulateTerminal" value="false" />
+      <option name="backtrace" value="SHORT" />
+      <envs />
+      <option name="isRedirectInput" value="false" />
+      <option name="redirectInputPath" value="" />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Test policy" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="command" value="test --package redismodule --lib policy" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$" />
       <option name="channel" value="DEFAULT" />
       <option name="allFeatures" value="false" />
@@ -102,8 +159,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Cargo.Run test" />
-        <item itemvalue="Cargo.build" />
+        <item itemvalue="Cargo.Test policy" />
+        <item itemvalue="Cargo.Test cycles" />
+        <item itemvalue="Cargo.Test model" />
+        <item itemvalue="Cargo.Test model::test::proto" />
+        <item itemvalue="Cargo.Test model::test" />
       </list>
     </recent_temporary>
   </component>
@@ -123,7 +183,10 @@
       <workItem from="1610421983755" duration="89000" />
       <workItem from="1610422089336" duration="72000" />
       <workItem from="1610432261427" duration="8161000" />
-      <workItem from="1610440896986" duration="16426000" />
+      <workItem from="1610440896986" duration="18876000" />
+      <workItem from="1610523905759" duration="6301000" />
+      <workItem from="1610541304726" duration="3786000" />
+      <workItem from="1610694056688" duration="5736000" />
     </task>
     <servers />
   </component>

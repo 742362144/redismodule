@@ -17,8 +17,8 @@ use redis_module::{ThreadSafeContext, DetachedFromClient};
 use libloading::os::unix::{Library, Symbol};
 use std::pin::Pin;
 use std::ops::{Generator, GeneratorState};
-use crate::{Invoke, init, Task, TaskState};
-
+use crate::{Invoke, Task, TaskState};
+use super::ext::init;
 
 //
 // /// This enum represents the different states a task can be in.
@@ -154,8 +154,6 @@ impl Executor {
                 }
 
             }
-            let task = self.waiting.write().unwrap().pop_front();
-
             let task = self.running.write().unwrap().pop_front();
 
             if let Some(mut task) = task {

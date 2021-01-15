@@ -12,18 +12,18 @@ edition = "2018"
 #required-features= ["generator_trait", "generators"]
 
 
-#[[bin]]
-#name = "client"
-#path = "src/bin/client.rs"
-#
+[[bin]]
+name = "bench"
+path = "src/bin/bench.rs"
+
 #[[example]]
 #name = "module"
 #crate-type = ["cdylib"]
 #required-features = ["experimental-api"]
 
-[lib]
-name = "redismodule"
-crate-type = ["cdylib"]
+#[lib]
+#name = "redismodule"
+#crate-type = ["cdylib"]
 
 [dependencies]
 tonic = { version = "0.1.0", features = ["tls"] }
@@ -68,6 +68,9 @@ time = "0.2.23"
 rand = "0.8.1"
 #redis-module = {version = "0.11.0", feature = ["experimental-api"]}
 log = "0.4.8"
+redis = "0.19.0"
+resp = {path = "./util/resp"}
+
 
 [dependencies.redis-module]
 version = "0.11.0"

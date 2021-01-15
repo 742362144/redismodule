@@ -5,18 +5,19 @@ use tonic::{transport::Server, Request, Response, Status};
 
 use redis_module::{Context, RedisError, RedisResult, ThreadSafeContext, DetachedFromClient};
 
-use hello_world::greeter_server::{Greeter, GreeterServer};
-use hello_world::{HelloReply, HelloRequest};
+use funcloc::func_loc_server::{FuncLoc, FuncLocServer};
+use funcloc::{InvokeRequest, InvokeReply};
 use std::thread;
 
 use std::time::Duration;
 
 use super::executor::Executor;
 use std::rc::Rc;
-use crate::{Invoke, init};
+use crate::{Invoke};
+use super::ext::init;
 
-pub mod hello_world {
-    tonic::include_proto!("helloworld");
+pub mod funcloc {
+    tonic::include_proto!("funcloc");
 }
 
 // #[derive(Default)]
@@ -33,11 +34,11 @@ impl MyGreeter {
 }
 
 #[tonic::async_trait]
-impl Greeter for MyGreeter {
-    async fn say_hello(
+impl FuncLoc for MyGreeter {
+    async fn invoke(
         &self,
-        request: Request<HelloRequest>,
-    ) -> Result<Response<HelloReply>, Status> {
+        request: Request<InvokeRequest>,
+    ) -> Result<Response<InvokeReply>, Status> {
         let (tx, rx): (Sender<String>, Receiver<String>) = mpsc::channel();
 
         let inv = Invoke{tx: Mutex::new(tx), req: String::from("hello")};
@@ -47,10 +48,20 @@ impl Greeter for MyGreeter {
 
         let res = rx.recv().unwrap();
         println!("{}", res);
+
+        // let res = rx.recv();
+        // if !res.is_err() {
+        //     println!("{}", res.unwrap());
+        //     println!("Got a request from {:?}", request.remote_addr());
+        // } else{
+        //     println!("{}", "Error!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        // }
+
+
         println!("Got a request from {:?}", request.remote_addr());
 
-        let reply = hello_world::HelloReply {
-            message: format!("Hello {}!", request.into_inner().name),
+        let reply = funcloc::InvokeReply {
+            result: format!("Hello {}!", request.into_inner().request),
         };
         Ok(Response::new(reply))
     }
@@ -86,11 +97,10 @@ pub async fn start_server(tctx: ThreadSafeContext<DetachedFromClient>) -> Result
     });
 
 
-
     println!("GreeterServer listening on {}", addr);
 
     Server::builder()
-        .add_service(GreeterServer::new(greeter))
+        .add_service(FuncLocServer::new(greeter))
         .serve(addr)
         .await?;
 
