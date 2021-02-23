@@ -1,23 +1,23 @@
-use hello_world::greeter_client::GreeterClient;
-use hello_world::HelloRequest;
+use funcloc::func_loc_client::FuncLocClient;
+use funcloc::InvokeRequest;
 
 mod test;
 
-pub mod hello_world {
-    tonic::include_proto!("helloworld");
+pub mod funcloc {
+    tonic::include_proto!("funcloc");
 }
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut client = GreeterClient::connect("http://[::1]:50051").await?;
+    let mut client = FuncLocClient::connect("http://[::1]:50051").await?;
 
-    let request = tonic::Request::new(HelloRequest {
-        name: "Tonic".into(),
+    let request = tonic::Request::new(InvokeRequest {
+        request: "Tonic".into(),
     });
 
-    let response = client.say_hello(request).await?;
+    let response = client.invoke(request).await?;
 
-    println!("RESPONSE={:?}", response);
+    println!("RESPONSE={:?}", response.into_inner().result);
 
     Ok(())
 }

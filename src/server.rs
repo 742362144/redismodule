@@ -10,11 +10,11 @@ use funcloc::{InvokeRequest, InvokeReply};
 use std::thread;
 
 use std::time::Duration;
+use runtime::executor::Executor;
+use runtime::invoke::Invoke;
+use crate::policy::LocalPolicy;
+use runtime::task::Container;
 
-use super::executor::Executor;
-use std::rc::Rc;
-use crate::{Invoke};
-use super::ext::init;
 
 pub mod funcloc {
     tonic::include_proto!("funcloc");
@@ -42,9 +42,11 @@ impl FuncLoc for MyGreeter {
         let (tx, rx): (Sender<String>, Receiver<String>) = mpsc::channel();
 
         let inv = Invoke{tx: Mutex::new(tx), req: String::from("hello")};
-        self.exec.add_task(inv);
+        let policy = self.exec.clone().policy.clone();
 
-        // self.tx.lock().unwrap().send(Invoke{tx, req: String::from("hello")});
+        let container = Container::new(Box::new(inv), policy);
+        self.exec.add_task(Box::new(container));
+
 
         let res = rx.recv().unwrap();
         println!("{}", res);
@@ -60,10 +62,16 @@ impl FuncLoc for MyGreeter {
 
         println!("Got a request from {:?}", request.remote_addr());
 
+        if res == "success" {
+            let reply = funcloc::InvokeReply {
+                result: String::from("success"),
+            };
+            return Ok(Response::new(reply));
+        }
         let reply = funcloc::InvokeReply {
-            result: format!("Hello {}!", request.into_inner().request),
+            result: String::from("pushback"),
         };
-        Ok(Response::new(reply))
+        return Ok(Response::new(reply));
     }
 }
 
@@ -81,15 +89,15 @@ pub async fn start_server(tctx: ThreadSafeContext<DetachedFromClient>) -> Result
     let addr = "[::1]:50051".parse().unwrap();
 
     // let (tx, rx): (Sender<Invoke>, Receiver<Invoke>) = mpsc::channel();
-    let executor = Arc::new(Executor::new(Mutex::new(tctx)));
-    // let arc = Arc::new(executor);
-    let exec = executor.clone();
+    let policy = Mutex::new(LocalPolicy::new(Mutex::new(tctx)));
+    let exec = Arc::new(Executor::new(Arc::new(policy)));
+    let executor = exec.clone();
 
-    let greeter = MyGreeter::new(executor);
+    let greeter = MyGreeter::new(exec);
     // let (tx, rx) : (Sender<Invoke>, Receiver<Invoke>) = mpsc::channel();
 
     thread::spawn(move || {
-        exec.run();
+        executor.run();
         // loop {
         //     round.run();
         //     // time::Duration::from_millis(1000);

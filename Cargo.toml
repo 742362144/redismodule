@@ -13,17 +13,17 @@ edition = "2018"
 
 
 [[bin]]
-name = "bench"
-path = "src/bin/bench.rs"
+name = "client"
+path = "src/bin/client.rs"
 
 #[[example]]
 #name = "module"
 #crate-type = ["cdylib"]
 #required-features = ["experimental-api"]
 
-#[lib]
-#name = "redismodule"
-#crate-type = ["cdylib"]
+[lib]
+name = "redismodule"
+crate-type = ["cdylib"]
 
 [dependencies]
 tonic = { version = "0.1.0", features = ["tls"] }
@@ -66,10 +66,10 @@ spin = "0.4.7"
 x86 = "0.34.0"
 time = "0.2.23"
 rand = "0.8.1"
+redis = "0.19.0"
 #redis-module = {version = "0.11.0", feature = ["experimental-api"]}
 log = "0.4.8"
-redis = "0.19.0"
-resp = {path = "./util/resp"}
+runtime = {path = "../runtime"}
 
 
 [dependencies.redis-module]
@@ -82,3 +82,5 @@ features = ["experimental-api"]
 [build-dependencies]
 tonic-build = { version = "0.3.1", features = ["prost"] }
 
+[profile.release]
+panic = 'abort'
