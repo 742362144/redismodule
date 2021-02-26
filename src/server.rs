@@ -41,7 +41,7 @@ impl FuncLoc for MyGreeter {
     ) -> Result<Response<InvokeReply>, Status> {
         let (tx, rx): (Sender<String>, Receiver<String>) = mpsc::channel();
 
-        let inv = Invoke{tx: Mutex::new(tx), req: String::from("hello")};
+        let inv = Invoke{tx: Mutex::new(tx), req: String::from(request.into_inner().request)};
         let policy = self.exec.clone().policy.clone();
 
         let container = Container::new(Box::new(inv), policy);
@@ -60,7 +60,7 @@ impl FuncLoc for MyGreeter {
         // }
 
 
-        println!("Got a request from {:?}", request.remote_addr());
+        // println!("Got a request from {:?}", request.remote_addr());
 
         if res == "success" {
             let reply = funcloc::InvokeReply {
