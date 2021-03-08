@@ -15,6 +15,12 @@ use runtime::invoke::Invoke;
 use crate::policy::LocalPolicy;
 use runtime::task::Container;
 
+extern crate self_meter;
+
+use std::io::{Write, stderr};
+use std::thread::sleep;
+use std::collections::BTreeMap;
+
 
 pub mod funcloc {
     tonic::include_proto!("funcloc");
@@ -85,24 +91,42 @@ pub async fn start_server(tctx: ThreadSafeContext<DetachedFromClient>) -> Result
     //     }
     // });
 
-
     let addr = "[::1]:50051".parse().unwrap();
 
     // let (tx, rx): (Sender<Invoke>, Receiver<Invoke>) = mpsc::channel();
     let policy = Mutex::new(LocalPolicy::new(Mutex::new(tctx)));
-    let exec = Arc::new(Executor::new(Arc::new(policy)));
+    let mut exec = Arc::new(Executor::new(Arc::new(policy)));
     let executor = exec.clone();
 
     let greeter = MyGreeter::new(exec);
     // let (tx, rx) : (Sender<Invoke>, Receiver<Invoke>) = mpsc::channel();
 
-    thread::spawn(move || {
+    thread::Builder::new().name("executor".to_string()).spawn(move || {
         executor.run();
         // loop {
         //     round.run();
         //     // time::Duration::from_millis(1000);
         // }
     });
+
+    thread::spawn(move || {
+        let mut meter = self_meter::Meter::new(Duration::new(1, 0)).unwrap();
+        meter.track_current_thread("executor");
+        loop {
+            meter.scan()
+                .map_err(|e| writeln!(&mut stderr(), "Scan error: {}", e)).ok();
+            println!("Report: {:#?}", meter.report());
+            println!("Threads: {:#?}",
+                     meter.thread_report().map(|x| x.collect::<BTreeMap<_,_>>()));
+            let mut x = 0;
+            for _ in 0..10000000 {
+                x = u64::wrapping_mul(x, 7);
+            }
+            sleep(Duration::new(1, 0));
+        }
+    });
+
+
 
 
     println!("GreeterServer listening on {}", addr);

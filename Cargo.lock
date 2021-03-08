@@ -1652,6 +1652,7 @@ dependencies = [
  "redis",
  "redis-module",
  "runtime",
+ "self-meter",
  "serde 1.0.119",
  "serde_json 1.0.61",
  "spin 0.4.10",
@@ -1737,6 +1738,7 @@ dependencies = [
  "redis",
  "redis-module",
  "rustlearn",
+ "self-meter",
  "systemstat",
  "time 0.2.24",
  "x86",
@@ -1815,6 +1817,19 @@ checksum = "e3042af939fca8c3453b7af0f1c66e533a15a86169e39de2657310ade8f98d3c"
 dependencies = [
  "ring",
  "untrusted",
+]
+
+[[package]]
+name = "self-meter"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7f5db5de2ab21bed9d4cde060886b4fdbee58a9d8a95c8becc7ea549a7ba8bc8"
+dependencies = [
+ "libc",
+ "num_cpus",
+ "quick-error",
+ "serde 1.0.119",
+ "serde_derive",
 ]
 
 [[package]]
